@@ -77,6 +77,9 @@ cp .env.example .env    # set VITE_APP_ID + VITE_API_URL, VITE_USE_MOCK=false
 |---|---|---|
 | `AI_GATEWAY_KEY` | askAgent | Bearer token for the AI gateway (the account `bb_sk`). The anon key is **not** authorized for the gateway. Server-side only. |
 | `ATLAS_MODEL` | askAgent | Pinned to `anthropic/claude-haiku-4.5` for fast, consistent answers. |
+| `AGENT_BACKEND` | askAgent | `gateway` (Phase 1) or `rocketride` (Phase 2). Flipping to `gateway` is the instant rollback. |
+| `ROCKETRIDE_URL`, `ROCKETRIDE_KEY` | askAgent | Person B's RocketRide webhook + its public `pk_` key. Called on every ask when `AGENT_BACKEND=rocketride`. |
+| `ROCKETRIDE_STRICT` | askAgent | `true` = hard-fail if RocketRide is down (to demo the load-bearing dependency). Default (unset) = safe gateway fallback. |
 | `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` | runGraphQuery | **Person B fills these** (same names as `NEO4J_SETUP.md`). Absent → the function serves known-good fixtures. Present → it runs the pre-written Cypher via Neo4j's HTTP Query API (derived from the Bolt URI's host). |
 
 ## Handoff to Person B (Neo4j)
