@@ -1,0 +1,29 @@
+{
+  "tables": {
+    "profiles": {
+      "columns": {
+        "user_id": { "type": "text", "primaryKey": true },
+        "email": { "type": "text" },
+        "plan": { "type": "text", "nullable": false, "default": "'free'" },
+        "created_at": { "type": "timestamptz", "default": "now()" }
+      }
+    },
+    "saved_questions": {
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true, "default": "gen_random_uuid()" },
+        "user_id": { "type": "text", "nullable": false },
+        "question": { "type": "text", "nullable": false },
+        "answer": { "type": "text", "nullable": false },
+        "query_id": { "type": "text" },
+        "created_at": { "type": "timestamptz", "default": "now()" }
+      }
+    },
+    "queries_used": {
+      "columns": {
+        "user_id": { "type": "text", "primaryKey": true },
+        "count": { "type": "integer", "nullable": false, "default": "0" },
+        "updated_at": { "type": "timestamptz", "default": "now()" }
+      }
+    }
+  }
+}

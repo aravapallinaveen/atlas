@@ -9,6 +9,9 @@ dist-ssr/
 # Claude Code tooling (machine-specific, not shared)
 .claude/
 
+# Butterbase local project config (may reference app/keys)
+.butterbase/
+
 # macOS
 .DS_Store
 
