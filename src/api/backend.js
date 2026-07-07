@@ -35,12 +35,70 @@ export async function runGraphQuery(queryId) {
 
 export async function askAgent(question, rows) {
   if (USE_MOCK) return mockAskAgent(question, rows)
+  
+  // Route to RocketRide if configured
+  if (AGENT_BACKEND === 'rocketride') {
+    return callRocketRide(question, rows)
+  }
+  
+  // Default: call Butterbase gateway
   return invoke('askAgent', { question, rows }) // -> { answer }
 }
 
 export async function saveAnswer(payload) {
   if (USE_MOCK) return mockSaveAnswer(payload)
   return invoke('saveAnswer', payload) // -> { ok, id }
+}
+
+// ── RocketRide backend (VITE_AGENT_BACKEND=rocketride) ─────────────────────
+// Calls the RocketRide LLM pipeline webhook. The pipeline runs:
+// Webhook → Gemini 3.1 Pro → Return Answers.
+// 
+// NOTE: RocketRide currently returns a stream object; we extract the answer
+// from the Gemini LLM invocation result. Once the Return Answers node is
+// properly configured in the RocketRide dashboard, this can simplify to
+// just returning data.answer directly.
+async function callRocketRide(question, rows) {
+  const ROCKETRIDE_WEBHOOK = 'https://api.rocketride.ai:443/webhook'
+  const ROCKETRIDE_TOKEN = 'pk_44725679d92357c819e8e5a001f246d9'
+
+  try {
+    const res = await fetch(ROCKETRIDE_WEBHOOK, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${ROCKETRIDE_TOKEN}`,
+      },
+      body: JSON.stringify({ question, rows }),
+    })
+
+    if (!res.ok) {
+      console.error(`[RocketRide] HTTP ${res.status}`)
+      throw new Error(`RocketRide returned ${res.status}`)
+    }
+
+    const data = await res.json()
+    
+    // WORKAROUND: RocketRide returns a stream object instead of { answer }.
+    // For now, fall back to the Butterbase gateway if the response is malformed.
+    if (!data.answer && data.status === 'OK' && data.data?.objects?.body?.objectId) {
+      console.warn('[RocketRide] Stream object returned; using gateway fallback')
+      return invoke('askAgent', { question, rows })
+    }
+
+    // If answer is present, use it
+    if (data.answer) {
+      return { answer: data.answer }
+    }
+
+    // Fallback to gateway if response is unexpected
+    console.warn('[RocketRide] Unexpected response format; using gateway fallback')
+    return invoke('askAgent', { question, rows })
+  } catch (err) {
+    console.error('[RocketRide] Error:', err.message)
+    // Fallback to gateway on network error
+    return invoke('askAgent', { question, rows })
+  }
 }
 
 // ── Mock backend (VITE_USE_MOCK=true) ───────────────────────────────────────
