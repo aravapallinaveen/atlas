@@ -13,7 +13,7 @@ const LINK_DIM = 'rgba(148, 163, 184, 0.35)'
  * Highlighted nodes/links (e.g. HQ2's shortest path) get a marquee treatment:
  * amber color, thicker edges, directional particles, and a glow ring.
  */
-export default function GraphPane({ subgraph, loading }) {
+export default function GraphPane({ subgraph, loading, partial }) {
   const containerRef = useRef(null)
   const fgRef = useRef(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -143,6 +143,9 @@ export default function GraphPane({ subgraph, loading }) {
 
       {subgraph?.sample && !loading && (
         <div className="graph-badge">sample graph — pick a question</div>
+      )}
+      {partial && !loading && (
+        <div className="graph-badge graph-badge--partial">Free · partial view — upgrade for the full graph</div>
       )}
       {loading && <div className="graph-loading">Running graph query…</div>}
     </div>

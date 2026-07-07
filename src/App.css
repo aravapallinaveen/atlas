@@ -509,3 +509,197 @@
 .signout-btn:hover {
   border-color: var(--accent-2);
 }
+
+/* ── Payment: plan badge, upgrade, cap banner ──────────────────────────────── */
+.plan-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.plan-badge--pro {
+  color: #0b1120;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border: none;
+}
+
+.upgrade-btn {
+  padding: 6px 12px;
+  color: #0b1120;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.upgrade-btn:hover {
+  filter: brightness(1.08);
+}
+
+.cap-banner {
+  padding: 11px 13px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 10px;
+}
+
+.cap-banner__link {
+  padding: 0;
+  color: var(--accent);
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.graph-badge--partial {
+  color: #fde68a;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+/* ── Checkout modal ────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(2, 6, 16, 0.66);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 26px 24px 20px;
+  background: var(--panel-solid);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.modal__close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal__title {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+
+.modal__sub {
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.modal__line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.modal__input {
+  padding: 10px 12px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.modal__applied {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #86efac;
+}
+
+.modal__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 0 6px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.modal__total strong {
+  font-size: 20px;
+}
+
+.modal__error {
+  margin: 0;
+  font-size: 13px;
+  color: #fca5a5;
+}
+
+.modal__pay {
+  margin-top: 6px;
+  padding: 12px 14px;
+  color: #0b1120;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.modal__pay:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.modal__pay:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modal__secure {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+}

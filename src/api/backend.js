@@ -43,6 +43,16 @@ export async function saveAnswer(payload) {
   return invoke('saveAnswer', payload) // -> { ok, id }
 }
 
+export async function getEntitlement() {
+  if (USE_MOCK) return { plan: 'free', queriesUsed: 0 }
+  return invoke('getEntitlement', {}) // -> { plan, queriesUsed }
+}
+
+export async function upgradeToPro(promo) {
+  if (USE_MOCK) return { ok: true, plan: 'pro' }
+  return invoke('upgradeToPro', { promo }) // -> { ok, plan }
+}
+
 // ── Mock backend (VITE_USE_MOCK=true) ───────────────────────────────────────
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 

@@ -21,6 +21,13 @@ the "C" workstream of Phase 1; it plugs into the front-end seam
 | `runGraphQuery(queryId)` | `functions/runGraphQuery.ts` | `{ rows, subgraph }` |
 | `askAgent(question, rows)` | `functions/askAgent.ts` (AI gateway) | `{ answer }` |
 | `saveAnswer({question, answer, queryId})` | `functions/saveAnswer.ts` | `{ ok, id }` |
+| `getEntitlement()` | `functions/getEntitlement.ts` | `{ plan, queriesUsed }` |
+| `upgradeToPro(promo)` | `functions/upgradeToPro.ts` | `{ ok, plan }` |
+
+**Payment gate (Phase 2):** Free = 5-query cap + partial graph; Pro = unlimited + full
+graph. `getEntitlement` reads the plan/usage; the "Upgrade to Pro" checkout uses promo
+`ENJOY0707` ($0) → `upgradeToPro` flips `profiles.plan` to `pro`. Cap + partial-graph
+gating is enforced in the UI.
 
 The front-end SDK client is [`src/api/butterbase.js`](../src/api/butterbase.js); it reads
 `VITE_APP_ID` / `VITE_API_URL` (see [`.env.example`](../.env.example)).
