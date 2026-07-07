@@ -1,0 +1,15 @@
+# Claude Code local settings (machine-specific, not shared)
+.claude/settings.local.json
+
+# macOS
+.DS_Store
+
+# Editor / OS cruft
+*.swp
+*.swo
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
