@@ -70,15 +70,16 @@ cp .env.example .env    # set VITE_APP_ID + VITE_API_URL, VITE_USE_MOCK=false
 |---|---|---|
 | `AI_GATEWAY_KEY` | askAgent | Bearer token for the AI gateway (the account `bb_sk`). The anon key is **not** authorized for the gateway. Server-side only. |
 | `ATLAS_MODEL` | askAgent | Pinned to `anthropic/claude-haiku-4.5` for fast, consistent answers. |
-| `NEO4J_HTTP_URL`, `NEO4J_USER`, `NEO4J_PASSWORD` | runGraphQuery | **Person B fills these.** Absent → the function serves known-good fixtures. Present → it runs the pre-written Cypher via Neo4j's HTTP Query API. |
+| `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` | runGraphQuery | **Person B fills these** (same names as `NEO4J_SETUP.md`). Absent → the function serves known-good fixtures. Present → it runs the pre-written Cypher via Neo4j's HTTP Query API (derived from the Bolt URI's host). |
 
 ## Handoff to Person B (Neo4j)
 
 `runGraphQuery.ts` ships with the pre-written hero Cypher (`CYPHER`) and known-good
 fixtures. To go live on the seeded Aura graph:
 
-1. `npx butterbase functions env set runGraphQuery NEO4J_HTTP_URL=... NEO4J_USER=... NEO4J_PASSWORD=...`
-2. Complete the result-shaping `TODO` in `runLiveNeo4j()` (Neo4j rows → `{rows, subgraph}`).
+1. `npx butterbase functions env set runGraphQuery NEO4J_URI=... NEO4J_USERNAME=... NEO4J_PASSWORD=...`
+   (the same values from your `NEO4J_SETUP.md` / Aura instance)
+2. Complete the result-shaping `TODO` in `runLiveNeo4j()` (Neo4j HTTP result → `{rows, subgraph}`).
 
 Until then, the fixtures make the whole app demoable — no dependency on Neo4j.
 

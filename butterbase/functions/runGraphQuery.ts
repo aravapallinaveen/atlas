@@ -36,16 +36,20 @@ const NODE: Record<string, { label: string; type: string }> = {
 };
 const n = (id: string) => ({ id, ...NODE[id] });
 
-// ── Pre-written hero Cypher (Person B confirms/replaces against the seeded graph) ─
+// ── Pre-written hero Cypher (canonical versions from Person B's hero-queries.cypher) ─
 const CYPHER: Record<string, string> = {
-  hq1: `MATCH (p:Person {name:'Sam'})-[:OWNS]->(s:Service)<-[:DEPENDS_ON]-(dep:Service)
-        RETURN p, s, dep`,
-  hq2: `MATCH (proj:Project {name:'Checkout Revamp'}), (team:Team {name:'Data Platform'}),
-        path = shortestPath((proj)-[*..8]-(team)) RETURN path`,
-  hq3: `MATCH path = (root:Task)-[:BLOCKS*]->(:Task {name:'Ship Checkout Revamp'})
-        WHERE NOT (()-[:BLOCKS]->(root))
-        OPTIONAL MATCH (owner:Person)-[:ASSIGNED_TO]->(root)
-        RETURN path, root, owner`,
+  hq1: `MATCH (owner:Person {name: 'Sam'})-[:OWNS]->(service:Service {name: 'Billing'})
+        MATCH (downstream:Service)-[:DEPENDS_ON]->(service)
+        RETURN owner.name AS owner, service.name AS service, downstream.name AS impacts
+        ORDER BY downstream.name`,
+  hq2: `MATCH path = shortestPath(
+          (project:Project {name: 'Checkout Revamp'})-[*1..15]-(team:Team {name: 'Data Platform'}))
+        WITH nodes(path) AS pathNodes
+        UNWIND pathNodes AS node
+        RETURN pathNodes[0].name AS start, node.name AS step, pathNodes[-1].name AS end`,
+  hq3: `MATCH (root:Task {name: 'Migrate to new Gateway'})-[:BLOCKS*1..10]->(blocked:Task {name: 'Ship Checkout Revamp'})
+        MATCH (assignee:Person)-[:ASSIGNED_TO]->(root)
+        RETURN root.name AS root_cause, assignee.name AS assigned_to, blocked.name AS final_blocked_task`,
 };
 
 // ── Known-good fixtures (the {rows, subgraph} each hero query resolves to) ────────
@@ -123,20 +127,27 @@ const FIXTURES: Record<string, unknown> = {
 };
 
 // ── Live Neo4j (HTTP Query API) — enabled once Person B sets the env vars ─────────
-// Person B: fill in the per-query result shaping (Neo4j rows -> {rows, subgraph}).
-// Using the HTTP Query API keeps the function dependency-free (plain fetch).
+// Uses the same creds Person B documents in NEO4J_SETUP.md:
+//   NEO4J_URI (neo4j+s://<dbid>.databases.neo4j.io), NEO4J_USERNAME, NEO4J_PASSWORD
+// The Bolt URI's host also serves Aura's HTTP Query API, so we derive the https URL
+// and use plain fetch (no Bolt driver needed in the Deno runtime).
+function neo4jHttpUrl(ctx: any): string {
+  const host = String(ctx.env.NEO4J_URI).replace(/^neo4j\+s:\/\//, "").replace(/^bolt:\/\//, "").replace(/\/$/, "");
+  return `https://${host}/db/neo4j/query/v2`;
+}
+
 async function runLiveNeo4j(queryId: string, ctx: any) {
-  const url = ctx.env.NEO4J_HTTP_URL; // e.g. https://<dbid>.databases.neo4j.io/db/neo4j/query/v2
-  const auth = "Basic " + btoa(`${ctx.env.NEO4J_USER}:${ctx.env.NEO4J_PASSWORD}`);
-  const res = await fetch(url, {
+  const auth = "Basic " + btoa(`${ctx.env.NEO4J_USERNAME}:${ctx.env.NEO4J_PASSWORD}`);
+  const res = await fetch(neo4jHttpUrl(ctx), {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: auth },
     body: JSON.stringify({ statement: CYPHER[queryId] }),
   });
   if (!res.ok) throw new Error(`Neo4j query failed: ${res.status}`);
   const data = await res.json();
-  // TODO(Person B): shape `data` into { rows, subgraph }. Until then we fall back to
-  // the fixture subgraph so the graph still renders while the live rows come through.
+  // TODO(Person B/C): shape `data` (Neo4j HTTP Query API result) into { rows, subgraph }.
+  // Until that shaping is done we keep the fixture subgraph so the graph still renders
+  // with the live rows attached for inspection.
   return { ...(FIXTURES[queryId] as any), _neo4j: data };
 }
 
@@ -165,7 +176,7 @@ export default async function handler(req: Request, ctx: any): Promise<Response>
 
   await bumpQueriesUsed(ctx);
 
-  const neo4jReady = !!(ctx.env.NEO4J_HTTP_URL && ctx.env.NEO4J_USER && ctx.env.NEO4J_PASSWORD);
+  const neo4jReady = !!(ctx.env.NEO4J_URI && ctx.env.NEO4J_USERNAME && ctx.env.NEO4J_PASSWORD);
   try {
     const result = neo4jReady ? await runLiveNeo4j(queryId, ctx) : FIXTURES[queryId];
     return json(result);
